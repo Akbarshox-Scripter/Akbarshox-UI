@@ -1,4 +1,4 @@
--- [[ Akbarshox-UI v13.2 - SLIDER & BOX FIX ]] --
+-- [[ Akbarshox-UI v13.3 - PREMIUM VIBE EDITION ]] --
 
 local Library = {}
 local ts = game:GetService("TweenService")
@@ -14,31 +14,38 @@ function Library:CreateWindow(name, animSpeed)
     
     local Main = Instance.new("Frame", ScreenGui)
     Main.Name = "Main"
-    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Main.Position = UDim2.new(0.5, -130, 0.5, -130)
     Main.Size = UDim2.new(0, 260, 0, 0)
     Main.ClipsDescendants = true
     Main.Active = true
     Main.Draggable = true
+    Main.BackgroundTransparency = 1 -- Стеклянный эффект старт
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
     
+    -- ТОТ САМЫЙ ГРАДИЕНТ
     local UIGrad = Instance.new("UIGradient", Main)
     UIGrad.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 20)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(220, 0, 0)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 20))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 15)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 15))
     })
     UIGrad.Rotation = 45
     
     task.spawn(function()
         while Main.Parent do
-            ts:Create(UIGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Offset = Vector2.new(1, 1)}):Play()
-            task.wait(3)
+            local t = ts:Create(UIGrad, TweenInfo.new(3, Enum.EasingStyle.Linear), {Offset = Vector2.new(1, 1)})
+            t:Play()
+            t.Completed:Wait()
             UIGrad.Offset = Vector2.new(-1, -1)
         end
     end)
 
-    ts:Create(Main, TweenInfo.new(animSpeed or 0.8, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 260, 0, 320)}):Play()
+    -- Премиальная анимация появления
+    ts:Create(Main, TweenInfo.new(animSpeed or 0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 260, 0, 320),
+        BackgroundTransparency = 0
+    }):Play()
 
     local Content = Instance.new("ScrollingFrame", Main)
     Content.Size = UDim2.new(1, -10, 1, -55)
@@ -46,6 +53,7 @@ function Library:CreateWindow(name, animSpeed)
     Content.BackgroundTransparency = 1
     Content.CanvasSize = UDim2.new(0, 0, 0, 0)
     Content.ScrollBarThickness = 2
+    Content.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
     
     local layout = Instance.new("UIListLayout", Content)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -62,33 +70,50 @@ function Library:CreateWindow(name, animSpeed)
     Title.Size = UDim2.new(0.7, 0, 1, 0)
     Title.Position = UDim2.new(0.08, 0, 0, 0)
     Title.Text = name or "Akbarshox UI"
-    Title.TextColor3 = Color3.new(1,1,1)
+    Title.TextColor3 = Color3.new(1, 1, 1)
     Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 14
     Title.BackgroundTransparency = 1
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
     local WindowFunctions = {}
 
+    -- СТИЛЬНЫЙ ДИЗАЙН ЭЛЕМЕНТОВ
+    local function ApplyStyle(obj)
+        obj.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        obj.BackgroundTransparency = 0.2
+        Instance.new("UICorner", obj).CornerRadius = UDim.new(0, 8)
+        local stroke = Instance.new("UIStroke", obj)
+        stroke.Color = Color3.fromRGB(255, 0, 0)
+        stroke.Thickness = 0.5
+        stroke.Transparency = 0.6
+    end
+
     function WindowFunctions:AddLabel(text)
         local l = Instance.new("TextLabel", Content)
-        l.Size = UDim2.new(0.9, 0, 0, 20)
+        l.Size = UDim2.new(0.9, 0, 0, 25)
         l.BackgroundTransparency = 1
         l.Text = text
-        l.TextColor3 = Color3.fromRGB(180, 180, 180)
-        l.Font = Enum.Font.Gotham
-        l.TextSize = 12
+        l.TextColor3 = Color3.fromRGB(200, 200, 200)
+        l.Font = Enum.Font.GothamMedium
+        l.TextSize = 11
         return l
     end
 
     function WindowFunctions:CreateButton(text, callback)
         local b = Instance.new("TextButton", Content)
         b.Size = UDim2.new(0.9, 0, 0, 35)
-        b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         b.Text = text
         b.TextColor3 = Color3.new(1,1,1)
-        b.Font = Enum.Font.GothamMedium
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-        b.MouseButton1Click:Connect(callback)
+        b.Font = Enum.Font.GothamBold
+        b.TextSize = 13
+        ApplyStyle(b)
+        b.MouseButton1Click:Connect(function()
+            ts:Create(b, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
+            task.wait(0.1)
+            ts:Create(b, TweenInfo.new(0.1), {BackgroundTransparency = 0.2}):Play()
+            callback()
+        end)
         return b
     end
 
@@ -96,86 +121,81 @@ function Library:CreateWindow(name, animSpeed)
         local s = false
         local t = Instance.new("TextButton", Content)
         t.Size = UDim2.new(0.9, 0, 0, 35)
-        t.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         t.Text = "  " .. text
         t.TextColor3 = Color3.new(1,1,1)
         t.TextXAlignment = Enum.TextXAlignment.Left
-        Instance.new("UICorner", t).CornerRadius = UDim.new(0, 6)
+        t.Font = Enum.Font.GothamMedium
+        ApplyStyle(t)
 
         local ind = Instance.new("Frame", t)
-        ind.Size = UDim2.new(0, 16, 0, 16)
-        ind.Position = UDim2.new(1, -25, 0.5, -8)
-        ind.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        ind.Size = UDim2.new(0, 24, 0, 12)
+        ind.Position = UDim2.new(1, -35, 0.5, -6)
+        ind.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         Instance.new("UICorner", ind).CornerRadius = UDim.new(1, 0)
+
+        local dot = Instance.new("Frame", ind)
+        dot.Size = UDim2.new(0, 10, 0, 10)
+        dot.Position = UDim2.new(0, 1, 0.5, -5)
+        dot.BackgroundColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
 
         t.MouseButton1Click:Connect(function()
             s = not s
-            ts:Create(ind, TweenInfo.new(0.2), {BackgroundColor3 = s and Color3.fromRGB(220, 0, 0) or Color3.fromRGB(60, 60, 60)}):Play()
+            ts:Create(dot, TweenInfo.new(0.2), {Position = s and UDim2.new(1, -11, 0.5, -5) or UDim2.new(0, 1, 0.5, -5)}):Play()
+            ts:Create(ind, TweenInfo.new(0.2), {BackgroundColor3 = s and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(50, 50, 50)}):Play()
             callback(s)
         end)
         return t
     end
 
     function WindowFunctions:CreateSlider(text, min, max, callback)
-        local frame = Instance.new("Frame", Content)
-        frame.Size = UDim2.new(0.9, 0, 0, 45)
-        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 6)
+        local f = Instance.new("Frame", Content)
+        f.Size = UDim2.new(0.9, 0, 0, 45)
+        ApplyStyle(f)
 
-        local lab = Instance.new("TextLabel", frame)
+        local lab = Instance.new("TextLabel", f)
         lab.Size = UDim2.new(1, 0, 0, 25)
         lab.Text = "  "..text..": "..min
         lab.TextColor3 = Color3.new(1,1,1)
         lab.BackgroundTransparency = 1
+        lab.Font = Enum.Font.Gotham
         lab.TextXAlignment = Enum.TextXAlignment.Left
 
-        local bg = Instance.new("Frame", frame)
+        local bg = Instance.new("Frame", f)
         bg.Size = UDim2.new(0.85, 0, 0, 4)
-        bg.Position = UDim2.new(0.07, 0, 0.7, 0)
+        bg.Position = UDim2.new(0.07, 0, 0.75, 0)
         bg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        Instance.new("UICorner", bg).CornerRadius = UDim.new(1, 0)
 
         local fill = Instance.new("Frame", bg)
         fill.Size = UDim2.new(0, 0, 1, 0)
-        fill.BackgroundColor3 = Color3.fromRGB(220, 0, 0)
+        fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
 
         local dragging = false
         local function update()
-            local inputPos = uis:GetMouseLocation().X
-            local relPos = math.clamp((inputPos - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
+            local relPos = math.clamp((uis:GetMouseLocation().X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
             fill.Size = UDim2.new(relPos, 0, 1, 0)
             local val = math.floor(min + (max - min) * relPos)
             lab.Text = "  "..text..": "..val
             callback(val)
         end
 
-        frame.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end
-        end)
-        uis.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-        end)
-        uis.InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then update() end
-        end)
-        return frame
+        f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true update() end end)
+        uis.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+        uis.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then update() end end)
+        return f
     end
 
     function WindowFunctions:CreateTextBox(placeholder, callback)
         local b = Instance.new("TextBox", Content)
         b.Size = UDim2.new(0.9, 0, 0, 35)
-        b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         b.PlaceholderText = placeholder
         b.Text = ""
         b.TextColor3 = Color3.new(1,1,1)
         b.Font = Enum.Font.Gotham
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-        
-        b.FocusLost:Connect(function(enter)
-            if enter then 
-                callback(b.Text)
-                b.Text = "" -- Очищаем после ввода
-            end
-        end)
+        ApplyStyle(b)
+        b.FocusLost:Connect(function(e) if e then callback(b.Text) b.Text = "" end end)
         return b
     end
 
