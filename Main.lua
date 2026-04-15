@@ -1,4 +1,4 @@
--- [[ Akbarshox-UI v13.3 - PREMIUM VIBE EDITION ]] --
+-- [[ Akbarshox-UI v13.4 - MOBILE PREMIUM FIX ]] --
 
 local Library = {}
 local ts = game:GetService("TweenService")
@@ -20,10 +20,9 @@ function Library:CreateWindow(name, animSpeed)
     Main.ClipsDescendants = true
     Main.Active = true
     Main.Draggable = true
-    Main.BackgroundTransparency = 1 -- Стеклянный эффект старт
+    Main.BackgroundTransparency = 1 
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
     
-    -- ТОТ САМЫЙ ГРАДИЕНТ
     local UIGrad = Instance.new("UIGradient", Main)
     UIGrad.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 15)),
@@ -41,7 +40,6 @@ function Library:CreateWindow(name, animSpeed)
         end
     end)
 
-    -- Премиальная анимация появления
     ts:Create(Main, TweenInfo.new(animSpeed or 0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
         Size = UDim2.new(0, 260, 0, 320),
         BackgroundTransparency = 0
@@ -67,7 +65,7 @@ function Library:CreateWindow(name, animSpeed)
     TopBar.BackgroundTransparency = 1
     
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Size = UDim2.new(0.7, 0, 1, 0)
+    Title.Size = UDim2.new(0.6, 0, 1, 0)
     Title.Position = UDim2.new(0.08, 0, 0, 0)
     Title.Text = name or "Akbarshox UI"
     Title.TextColor3 = Color3.new(1, 1, 1)
@@ -76,9 +74,35 @@ function Library:CreateWindow(name, animSpeed)
     Title.BackgroundTransparency = 1
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
+    -- === ВОТ ОНИ, ВЕРНУВШИЕСЯ КНОПКИ ЗАКРЫТИЯ === --
+    local function CreateHeadBtn(text, pos, color, callback)
+        local btn = Instance.new("TextButton", TopBar)
+        btn.Size = UDim2.new(0, 35, 0, 35)
+        btn.Position = pos
+        btn.Text = text
+        btn.TextColor3 = color
+        btn.BackgroundTransparency = 1
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 22
+        btn.MouseButton1Click:Connect(callback)
+    end
+
+    CreateHeadBtn("×", UDim2.new(0.85, 0, 0, 5), Color3.fromRGB(255, 60, 60), function() 
+        ScreenGui:Destroy()
+    end)
+
+    local minimized = false
+    CreateHeadBtn("-", UDim2.new(0.72, 0, 0, 5), Color3.new(1, 1, 1), function()
+        minimized = not minimized
+        ts:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quart), {
+            Size = minimized and UDim2.new(0, 260, 0, 45) or UDim2.new(0, 260, 0, 320)
+        }):Play()
+        Content.Visible = not minimized
+    end)
+    -- ============================================= --
+
     local WindowFunctions = {}
 
-    -- СТИЛЬНЫЙ ДИЗАЙН ЭЛЕМЕНТОВ
     local function ApplyStyle(obj)
         obj.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         obj.BackgroundTransparency = 0.2
@@ -164,42 +188,4 @@ function Library:CreateWindow(name, animSpeed)
         local bg = Instance.new("Frame", f)
         bg.Size = UDim2.new(0.85, 0, 0, 4)
         bg.Position = UDim2.new(0.07, 0, 0.75, 0)
-        bg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        Instance.new("UICorner", bg).CornerRadius = UDim.new(1, 0)
-
-        local fill = Instance.new("Frame", bg)
-        fill.Size = UDim2.new(0, 0, 1, 0)
-        fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-
-        local dragging = false
-        local function update()
-            local relPos = math.clamp((uis:GetMouseLocation().X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
-            fill.Size = UDim2.new(relPos, 0, 1, 0)
-            local val = math.floor(min + (max - min) * relPos)
-            lab.Text = "  "..text..": "..val
-            callback(val)
-        end
-
-        f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true update() end end)
-        uis.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-        uis.InputChanged:Connect(function(i) if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then update() end end)
-        return f
-    end
-
-    function WindowFunctions:CreateTextBox(placeholder, callback)
-        local b = Instance.new("TextBox", Content)
-        b.Size = UDim2.new(0.9, 0, 0, 35)
-        b.PlaceholderText = placeholder
-        b.Text = ""
-        b.TextColor3 = Color3.new(1,1,1)
-        b.Font = Enum.Font.Gotham
-        ApplyStyle(b)
-        b.FocusLost:Connect(function(e) if e then callback(b.Text) b.Text = "" end end)
-        return b
-    end
-
-    return WindowFunctions
-end
-
-return Library
+        bg.BackgroundColor3 = Color3.fromRGB(50, 50
