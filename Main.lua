@@ -1,11 +1,10 @@
--- [[ Akbarshox-UI v13.6 - EMERGENCY FIX ]] --
+-- [[ Akbarshox-UI v13.8 - FINAL SYNTAX FIX ]] --
 local Library = {}
 local ts = game:GetService("TweenService")
 local uis = game:GetService("UserInputService")
 local pgui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
 function Library:CreateWindow(name)
-    -- Удаляем старое меню, если оно есть
     if pgui:FindFirstChild("AkbarshoxUI") then pgui:FindFirstChild("AkbarshoxUI"):Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui", pgui)
@@ -16,7 +15,7 @@ function Library:CreateWindow(name)
     Main.Name = "Main"
     Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     Main.Position = UDim2.new(0.5, -130, 0.5, -130)
-    Main.Size = UDim2.new(0, 260, 0, 320) -- Фиксированный размер для теста
+    Main.Size = UDim2.new(0, 260, 0, 320)
     Main.Active = true
     Main.Draggable = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
@@ -34,7 +33,7 @@ function Library:CreateWindow(name)
     TopBar.BackgroundTransparency = 1
     
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Size = UDim2.new(0.6, 0, 1, 0)
+    Title.Size = UDim2.new(0.6, 1, 1, 0)
     Title.Position = UDim2.new(0.1, 0, 0, 0)
     Title.Text = name or "Akbarshox UI"
     Title.TextColor3 = Color3.new(1, 1, 1)
@@ -42,7 +41,6 @@ function Library:CreateWindow(name)
     Title.BackgroundTransparency = 1
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Кнопка закрытия
     local close = Instance.new("TextButton", TopBar)
     close.Size = UDim2.new(0, 35, 0, 35)
     close.Position = UDim2.new(0.85, 0, 0, 5)
@@ -57,6 +55,7 @@ function Library:CreateWindow(name)
     Content.Position = UDim2.new(0, 5, 0, 45)
     Content.BackgroundTransparency = 1
     Content.CanvasSize = UDim2.new(0, 0, 0, 500)
+    Content.ScrollBarThickness = 2
     
     local layout = Instance.new("UIListLayout", Content)
     layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -70,8 +69,9 @@ function Library:CreateWindow(name)
         b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
         b.Text = text
         b.TextColor3 = Color3.new(1, 1, 1)
+        b.Font = Enum.Font.GothamBold
         Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
-        b.MouseButton1Click:Connect(callback)
+        b.MouseButton1Click:Connect(function() callback() end)
         return b
     end
 
@@ -121,7 +121,23 @@ function Library:CreateWindow(name)
                 UpdateSlider(input)
             end
         end)
-        return f
+    end
+
+    function WindowFunctions:CreateTextBox(placeholder, callback)
+        local t = Instance.new("TextBox", Content)
+        t.Size = UDim2.new(0.9, 0, 0, 35)
+        t.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        t.PlaceholderText = placeholder
+        t.Text = ""
+        t.TextColor3 = Color3.new(1, 1, 1)
+        t.Font = Enum.Font.Gotham
+        Instance.new("UICorner", t).CornerRadius = UDim.new(0, 8)
+        t.FocusLost:Connect(function(enter)
+            if enter or t.Text ~= "" then
+                callback(t.Text)
+                t.Text = ""
+            end
+        end)
     end
 
     return WindowFunctions
