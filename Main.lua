@@ -1,18 +1,4 @@
--- [[ Akbarshox-UI v12.9 - UNIVERSAL VERSION ]] --
-
-local Library = {}
-local ts = game:GetService("TweenService")
-local pgui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
-function Library:CreateWindow(name, animSpeed)
-    if pgui:FindFirstChild("AkbarshoxUI") then
-        pgui:FindFirstChild("AkbarshoxUI"):Destroy()
-    end
-
-    local ScreenGui = Instance.new("ScreenGui", pgui)
-    ScreenGui.Name = "AkbarshoxUI"
-    ScreenGui.ResetOnSpawn = false
--- [[ Akbarshox-UI v13.0 - PRO VERSION ]] --
+-- [[ Akbarshox-UI v13.1 - FIX LOGIC ]] --
 
 local Library = {}
 local ts = game:GetService("TweenService")
@@ -56,7 +42,10 @@ function Library:CreateWindow(name, animSpeed)
         end
     end)
 
-    ts:Create(Main, TweenInfo.new(animSpeed or 0.8, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 260, 0, 320), BackgroundTransparency = 0}):Play()
+    ts:Create(Main, TweenInfo.new(animSpeed or 0.8, Enum.EasingStyle.Quart), {
+        Size = UDim2.new(0, 260, 0, 300), 
+        BackgroundTransparency = 0
+    }):Play()
 
     local TopBar = Instance.new("Frame", Main)
     TopBar.Size = UDim2.new(1, 0, 0, 45)
@@ -90,7 +79,6 @@ function Library:CreateWindow(name, animSpeed)
         Content.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
     end)
 
-    -- Кнопки управления (Закрыть/Свернуть)
     local function CreateHeadBtn(text, pos, color, callback)
         local btn = Instance.new("TextButton", TopBar)
         btn.Size = UDim2.new(0, 35, 0, 35)
@@ -110,7 +98,17 @@ function Library:CreateWindow(name, animSpeed)
 
     local WindowFunctions = {}
 
-    -- [[ 1. BUTTON ]] --
+    function WindowFunctions:AddLabel(text)
+        local lab = Instance.new("TextLabel", Content)
+        lab.Size = UDim2.new(0.9, 0, 0, 25)
+        lab.BackgroundTransparency = 1
+        lab.Text = text
+        lab.TextColor3 = Color3.fromRGB(200, 200, 200)
+        lab.Font = Enum.Font.Gotham
+        lab.TextSize = 12
+        return lab -- ОБЯЗАТЕЛЬНО
+    end
+
     function WindowFunctions:CreateButton(text, callback)
         local btn = Instance.new("TextButton", Content)
         btn.Size = UDim2.new(0.9, 0, 0, 38)
@@ -121,9 +119,9 @@ function Library:CreateWindow(name, animSpeed)
         btn.TextSize = 14
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
         btn.MouseButton1Click:Connect(callback)
+        return btn
     end
 
-    -- [[ 2. TOGGLE ]] --
     function WindowFunctions:CreateToggle(text, callback)
         local state = false
         local togFrame = Instance.new("TextButton", Content)
@@ -137,8 +135,8 @@ function Library:CreateWindow(name, animSpeed)
         Instance.new("UICorner", togFrame).CornerRadius = UDim.new(0, 8)
 
         local indicator = Instance.new("Frame", togFrame)
-        indicator.Size = UDim2.new(0, 20, 0, 20)
-        indicator.Position = UDim2.new(0.85, 0, 0.25, 0)
+        indicator.Size = UDim2.new(0, 18, 0, 18)
+        indicator.Position = UDim2.new(0.88, -10, 0.25, 0)
         indicator.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
 
@@ -147,9 +145,9 @@ function Library:CreateWindow(name, animSpeed)
             ts:Create(indicator, TweenInfo.new(0.3), {BackgroundColor3 = state and Color3.fromRGB(220, 0, 0) or Color3.fromRGB(60, 60, 60)}):Play()
             callback(state)
         end)
+        return togFrame
     end
 
-    -- [[ 3. SLIDER ]] --
     function WindowFunctions:CreateSlider(text, min, max, callback)
         local sliderFrame = Instance.new("Frame", Content)
         sliderFrame.Size = UDim2.new(0.9, 0, 0, 45)
@@ -158,7 +156,7 @@ function Library:CreateWindow(name, animSpeed)
 
         local label = Instance.new("TextLabel", sliderFrame)
         label.Size = UDim2.new(1, 0, 0, 25)
-        label.Text = "  " .. text
+        label.Text = "  " .. text .. ": " .. min
         label.TextColor3 = Color3.new(1, 1, 1)
         label.BackgroundTransparency = 1
         label.Font = Enum.Font.Gotham
@@ -173,10 +171,10 @@ function Library:CreateWindow(name, animSpeed)
         fill.Size = UDim2.new(0, 0, 1, 0)
         fill.BackgroundColor3 = Color3.fromRGB(220, 0, 0)
 
-        local button = Instance.new("TextButton", bar)
-        button.Size = UDim2.new(1, 0, 1, 0)
-        button.BackgroundTransparency = 1
-        button.Text = ""
+        local btn = Instance.new("TextButton", bar)
+        btn.Size = UDim2.new(1, 0, 1, 0)
+        btn.BackgroundTransparency = 1
+        btn.Text = ""
 
         local function update()
             local mousePos = game:GetService("UserInputService"):GetMouseLocation().X
@@ -189,4 +187,32 @@ function Library:CreateWindow(name, animSpeed)
             callback(value)
         end
 
-        button.MouseButton1Down
+        btn.MouseButton1Down:Connect(function()
+            local move; move = game:GetService("UserInputService").InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement then update() end
+            end)
+            game:GetService("UserInputService").InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then move:Disconnect() end
+            end)
+        end)
+        return sliderFrame
+    end
+
+    function WindowFunctions:CreateTextBox(placeholder, callback)
+        local box = Instance.new("TextBox", Content)
+        box.Size = UDim2.new(0.9, 0, 0, 38)
+        box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        box.PlaceholderText = placeholder
+        box.Text = ""
+        box.TextColor3 = Color3.new(1, 1, 1)
+        box.Font = Enum.Font.Gotham
+        box.TextSize = 13
+        Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+        box.FocusLost:Connect(function(ep) if ep then callback(box.Text) box.Text = "" end end)
+        return box
+    end
+
+    return WindowFunctions
+end
+
+return Library
